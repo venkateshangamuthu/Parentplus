@@ -1,4 +1,4 @@
-/* App-specific styles */
+/* App-specific layouts and premium components */
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -7,12 +7,18 @@
 
 main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Hero Section */
 .hero-section {
   position: relative;
   overflow: hidden;
-  padding: 8rem 0 5rem;
+  padding: 10rem 0 7rem;
+  background-image: 
+    radial-gradient(ellipse at 80% 20%, rgba(13, 148, 136, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 80%, rgba(79, 70, 229, 0.06) 0%, transparent 50%);
 }
 
 .hero-bg {
@@ -21,7 +27,7 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--background);
+  background: transparent;
   z-index: -1;
 }
 
@@ -30,38 +36,46 @@ main {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 800px;
+  max-width: 850px;
   margin: 0 auto;
 }
 
 .hero-title {
   font-size: 3.5rem;
   font-weight: 800;
+  letter-spacing: -0.025em;
   margin-bottom: 1.5rem;
   color: var(--text-main);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .hero-subtitle {
   font-size: 1.25rem;
   color: var(--text-muted);
   margin-bottom: 2.5rem;
-  max-width: 600px;
+  max-width: 650px;
+  font-weight: 400;
 }
 
+/* Nav Header */
 .nav-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 50;
-  padding: 1rem 0;
+  padding: 1.25rem 0;
   transition: var(--transition);
+  border-bottom: 1px solid transparent;
 }
 
 .nav-header.scrolled {
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 0;
 }
 
 .nav-container {
@@ -73,39 +87,51 @@ main {
 .logo {
   font-family: var(--font-heading);
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--primary);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  letter-spacing: -0.02em;
 }
 
 .nav-links {
   display: flex;
-  gap: 2rem;
+  gap: 1.75rem;
   align-items: center;
 }
 
 .nav-link {
   color: var(--text-main);
   font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
 }
 
 .nav-link:hover,
 .nav-link.active {
   color: var(--primary);
+  background-color: var(--primary-light);
 }
 
+/* Services section */
 .service-icon-wrapper {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-md);
-  background-color: #E9ECEF;
+  background-color: var(--surface-alt);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
   color: var(--primary);
+  transition: var(--transition);
+}
+
+.card:hover .service-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .feature-list {
@@ -115,20 +141,21 @@ main {
 
 .feature-item {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
   color: var(--text-muted);
 }
 
 .feature-icon {
-  color: var(--secondary);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
 }
 
 /* Dashboard Styles */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: 280px 1fr;
   gap: 2rem;
   margin-top: 2rem;
 }
@@ -136,24 +163,121 @@ main {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .sidebar-link {
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1.25rem;
   border-radius: var(--radius-md);
   color: var(--text-main);
   font-weight: 500;
   display: flex;
   align-items: center;
+  gap: 1rem;
+  transition: var(--transition);
+  font-size: 0.95rem;
+  text-align: left;
+  border: 1px solid transparent;
+}
+
+.sidebar-link:hover {
+  background-color: var(--surface-alt);
+  color: var(--primary);
+}
+
+.sidebar-link.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-color: rgba(13, 148, 136, 0.1);
+  font-weight: 600;
+}
+
+/* Recent Activity Timeline */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-icon {
+  position: absolute;
+  left: -2rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--background);
+  border: 2px solid var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 0 0 4px var(--background);
+}
+
+.timeline-icon.completed {
+  border-color: var(--success);
+}
+
+.timeline-icon.pending {
+  border-color: var(--accent);
+}
+
+/* Custom details cards */
+.details-list {
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
+}
+
+.details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.details-row:last-child {
+  border-bottom: none;
+}
+
+/* Mobile responsive menu */
+.mobile-menu-btn {
+  display: none;
+  color: var(--text-main);
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-alt);
   transition: var(--transition);
 }
 
-.sidebar-link:hover,
-.sidebar-link.active {
-  background-color: rgba(14, 165, 233, 0.1);
+.mobile-menu-btn:hover {
   color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -161,11 +285,27 @@ main {
     font-size: 2.5rem;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  .mobile-menu-btn {
+    display: block;
   }
 
   .nav-links {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 1.5rem;
+    right: 1.5rem;
+    background: var(--surface);
+    flex-direction: column;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .nav-links.open {
+    display: flex;
   }
 }

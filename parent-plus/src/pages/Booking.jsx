@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, MapPin, Stethoscope, AlertCircle, Sparkles, UserCheck } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const Booking = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const Booking = () => {
   useEffect(() => {
     const fetchAvailableCaretakers = async () => {
       try {
-        const response = await fetch('/api/bookings/caretakers/available', {
+        const response = await fetch(`${API_URL}/api/bookings/caretakers/available`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -31,8 +33,11 @@ const Booking = () => {
           },
         });
         if (response.ok) {
-          const data = await response.json();
-          setCaretakers(data);
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setCaretakers(data);
+          }
         }
       } catch (err) {
         console.error('Error fetching available caretakers:', err);
@@ -66,7 +71,7 @@ const Booking = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/bookings', {
+      const response = await fetch(`${API_URL}/api/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,10 +86,16 @@ const Booking = () => {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data = null;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error(`Server connection error: Check if backend is running (HTTP ${response.status})`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit booking.');
+        throw new Error(data?.message || 'Failed to submit booking.');
       }
 
       setConfirmedBooking(data);

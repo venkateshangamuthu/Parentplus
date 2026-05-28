@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const Dashboard = () => {
   const { user, token, updateAvailability } = useContext(AuthContext);
   
@@ -42,7 +44,7 @@ const Dashboard = () => {
     setError('');
     try {
       // Determine endpoint based on role
-      const endpoint = user.role === 'caretaker' ? '/api/bookings/caretaker' : '/api/bookings';
+      const endpoint = user.role === 'caretaker' ? `${API_URL}/api/bookings/caretaker` : `${API_URL}/api/bookings`;
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
@@ -50,6 +52,11 @@ const Dashboard = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server connection error: Received non-JSON response (HTTP ${response.status})`);
+      }
 
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard bookings.');
@@ -59,7 +66,7 @@ const Dashboard = () => {
       setBookings(data);
     } catch (err) {
       console.error('Error fetching bookings:', err);
-      setError('Could not sync booking history from cloud db.');
+      setError(err.message || 'Could not sync booking history from cloud db.');
     } finally {
       setLoading(false);
     }
@@ -92,7 +99,7 @@ const Dashboard = () => {
 
     setIsSubmittingSummary(true);
     try {
-      const response = await fetch(`/api/bookings/${bookingId}/complete`, {
+      const response = await fetch(`${API_URL}/api/bookings/${bookingId}/complete`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,10 +111,16 @@ const Dashboard = () => {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data = null;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error(`Server connection error: Check if backend is running (HTTP ${response.status})`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to complete booking.');
+        throw new Error(data?.message || 'Failed to complete booking.');
       }
 
       // Reset inputs & close drawer
@@ -133,7 +146,7 @@ const Dashboard = () => {
     
     setLoading(true);
     try {
-      const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+      const response = await fetch(`${API_URL}/api/bookings/${bookingId}/cancel`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -141,10 +154,16 @@ const Dashboard = () => {
         },
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data = null;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error(`Server connection error: Check if backend is running (HTTP ${response.status})`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to cancel booking.');
+        throw new Error(data?.message || 'Failed to cancel booking.');
       }
 
       // Refresh list

@@ -1,5 +1,24 @@
 import React, { createContext, useState, useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
+const handleResponse = async (response, defaultErrorMessage) => {
+  const contentType = response.headers.get('content-type');
+  let data = null;
+  if (contentType && contentType.includes('application/json')) {
+    data = await response.json();
+  } else {
+    // If it's not JSON, it might be an HTML/text error page from a proxy or hosting provider
+    throw new Error(`Server connection error: Check if backend is running (HTTP ${response.status})`);
+  }
+  
+  if (!response.ok) {
+    throw new Error(data?.message || defaultErrorMessage || `Request failed with status ${response.status}`);
+  }
+  
+  return data;
+};
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -16,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await fetch('/api/auth/me', {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -25,8 +44,14 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          setUser(data);
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            setUser(data);
+          } else {
+            console.warn('Profile fetch received non-JSON response');
+            setUser(null);
+          }
         } else {
           // Token expired or invalid
           localStorage.removeItem('token');
@@ -46,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setError(null);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,11 +79,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
+      const data = await handleResponse(response, 'Login failed');
 
       localStorage.setItem('token', data.token);
       setToken(data.token);
@@ -80,7 +101,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, phone, role) => {
     setError(null);
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,11 +109,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ name, email, password, phone, role }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
+      const data = await handleResponse(response, 'Registration failed');
 
       localStorage.setItem('token', data.token);
       setToken(data.token);
@@ -114,7 +131,7 @@ export const AuthProvider = ({ children }) => {
   const updateAvailability = async (isAvailable) => {
     setError(null);
     try {
-      const response = await fetch('/api/auth/availability', {
+      const response = await fetch(`${API_URL}/api/auth/availability`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -123,11 +140,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ isAvailable }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update availability.');
-      }
+      const data = await handleResponse(response, 'Failed to update availability');
 
       setUser((prevUser) => ({
         ...prevUser,
